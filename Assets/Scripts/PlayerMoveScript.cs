@@ -3,22 +3,30 @@ using UnityEngine;
 
 public class PlayerMoveScript : MonoBehaviour
 {
-    public Transform groundCheckTransform;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Transform groundCheckTransform;
+    public GameObject pickupEffect;
     private bool jumpKeyWasPressed;
     private float horizontalInput;
     private Rigidbody rigidBodyComponent;
     private int superJumpsRemaining;
+    Vector3 startPosition;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rigidBodyComponent = GetComponent<Rigidbody>();
+
+        startPosition = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
+        float moveX = Input.GetAxis("Horizontal");
+        rigidBodyComponent.linearVelocity = new Vector3(moveX * moveSpeed, rigidBodyComponent.linearVelocity.y);
+
         //Check if space key is pressed down
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -26,13 +34,16 @@ public class PlayerMoveScript : MonoBehaviour
         }
 
         horizontalInput = Input.GetAxis("Horizontal");
+
+    }
+    public void Die()
+    {
+        transform.position = startPosition;
     }
 
     // Fixed update is called once every physics udate
     private void FixedUpdate()
     {
-        rigidBodyComponent.linearVelocity = new Vector3(horizontalInput, rigidBodyComponent.linearVelocity.y, 0);
-
         if (Physics.OverlapSphere(groundCheckTransform.position, 0.1f).Length == 1)
         {
             return;
@@ -56,7 +67,7 @@ public class PlayerMoveScript : MonoBehaviour
         if (other.gameObject.layer == 6)
         {
             Destroy(other.gameObject);
-            superJumpsRemaining++;
+            superJumpsRemaining++;           
         }
     }
 }
